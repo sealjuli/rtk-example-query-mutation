@@ -1,54 +1,82 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const headers = {
-  Authorization: `Bearer ${process.env.REACT_APP_TOKEN}`
-}
+  Authorization: `Bearer ${process.env.REACT_APP_TOKEN}`,
+};
 
 export const toDoApi = createApi({
-  reducerPath: 'toDoApi',
+  reducerPath: "toDoApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.REACT_APP_URL
+    baseUrl: process.env.REACT_APP_URL,
   }),
-  tagTypes: ['Todos'],
-  endpoints: builder => ({
+  tagTypes: ["Todos"],
+  endpoints: (builder) => ({
     getToDos: builder.query({
       query: () => {
         return {
-          url: `todos?isCompleted=false`,
-          method: 'GET',
-          headers
-        }
+          url: `todos`,
+          method: "GET",
+          headers,
+        };
       },
-      providesTags: ['Todos']
+      onSuccess: (data) => console.log("Запрос успешен!", data),
+      providesTags: ["Todos"],
     }),
     createToDo: builder.mutation({
-      query: body => {
+      query: (body) => {
         return {
           url: `todos`,
-          method: 'POST',
+          method: "POST",
           headers,
-          body: body
-        }
+          body: body,
+        };
       },
-      invalidatesTags: ['Todos']
+      invalidatesTags: ["Todos"],
     }),
     deleteToDo: builder.mutation({
-      query: id => {
+      query: (id) => {
         return {
           url: `todos/${id}`,
-          method: 'DELETE',
-          headers
-        }
+          method: "DELETE",
+          headers,
+        };
       },
-      invalidatesTags: ['Todos'],
+      invalidatesTags: ["Todos"],
       transformResponse: (response, meta, arg) => response.data,
-      transformErrorResponse: (response, meta, arg) => response.status
-    })
-  })
-})
+      transformErrorResponse: (response, meta, arg) => response.status,
+    }),
+    UpdateToDo: builder.mutation({
+      query: ({ id, title }) => {
+        return {
+          url: `todos/${id}`,
+          method: "PATCH",
+          body: { title },
+          headers,
+        };
+      },
+      invalidatesTags: ["Todos"],
+      transformResponse: (response, meta, arg) => response.data,
+      transformErrorResponse: (response, meta, arg) => response.status,
+    }),
+    CompleteToDo: builder.mutation({
+      query: (id) => {
+        return {
+          url: `todos/${id}/isCompleted`,
+          method: "PATCH",
+          headers,
+        };
+      },
+      invalidatesTags: ["Todos"],
+      transformResponse: (response, meta, arg) => response.data,
+      transformErrorResponse: (response, meta, arg) => response.status,
+    }),
+  }),
+});
 
 export const {
   useGetToDosQuery,
   useCreateToDoMutation,
-  useDeleteToDoMutation
-} = toDoApi
+  useDeleteToDoMutation,
+  useUpdateToDoMutation,
+  useCompleteToDoMutation,
+} = toDoApi;
